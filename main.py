@@ -15,20 +15,21 @@ n = 10                   # Number of seeds
 class seed:
 
     def __init__(self, x, y, name):
-        self.s = np.array[[x], [y]]
+        self.s = np.array([[x], [y]])
+        #print(self.s)
         self.name = name
 
-def findMidpoint(p1, p2):
-    mpX = (p1[0]+p2[0])/2
-    mpY = (p1[1]+p2[1])/2
-    midpoint = np.array([[mpX], [mpY]])
-    #print(midpoint)
-    return midpoint
+    def findMidpoint(self, partnerSeed):
+        mpX = (self.s[0, 0]+partnerSeed.s[0, 0])/2
+        mpY = (self.s[1, 0]+partnerSeed.s[1, 0])/2
+        midpoint = np.array([[mpX], [mpY]])
+        #print(midpoint)
+        return midpoint
 
-def findGradient(p1, p2):
-    grad = (p2[1]-p1[1])/(p2[0]-p1[0])
-    normalGrad = -1/grad
-    return normalGrad
+    def findGradient(self, partnerSeed):
+        grad = (partnerSeed.s[1, 0]-self.s[1, 0])/(partnerSeed.s[0, 0]-self.s[0, 0])
+        normalGrad = -1/grad
+        return normalGrad
 
     def lineCalc(self, partnerSeed, pSeedName):
         midpoint = self.findMidpoint(partnerSeed)
@@ -41,31 +42,37 @@ def findGradient(p1, p2):
         ax.plot(y, color="black", linestyle="dashed")
 
 #* Plot settings
-fig, ax = plt.subplots()
-ax.set_ylim(0, 12)
-ax.set_xlim(0, 12)
+fig, ax = plt.subplots(figsize=(12, 10))
+ax.set_ylim(0, 22)
+ax.set_xlim(0, 22)
 ax.set_aspect("equal")
 
 
 xPoints = []
 yPoints = []
-seeds = np.array([[], []])
-for i in range(0, n):
-    xPoints.append(random.uniform(1, 10))
-    yPoints.append(random.uniform(1, 10))
-    seeds = np.append(seeds, [[xPoints[i]], [yPoints[i]]], axis=1)
-    print(f"(x, y) = ({xPoints[i]}, {yPoints[i]})")
+def createSeeds(n):
+    seeds = np.array([])
+    for i in range(0, n):
+        x = random.uniform(1, 20)
+        y = random.uniform(1, 20)
+        seeds = np.append(seeds, seed(x, y, f"{i+1}"))
+        ax.scatter(seeds[i].s[0, 0], seeds[i].s[1, 0], color="black", s=2)
+        ax.annotate(i+1, (seeds[i].s[0, 0], seeds[i].s[1, 0]), xycoords="data")
+    return seeds
+        
+seeds = createSeeds(n)
+for i in seeds:
+    print(i.name)
 
-print(f"Coordinate Matrix: \n {seeds}")
+l = 0
+for ball in range(0, len(seeds)):
+    for partner in range(0, len(seeds)):
+        if partner == ball:
+            pass
+        else:
+            seeds[ball].lineCalc(seeds[partner], seeds[partner].name)
+            l += 1
+print(l)
 
-#print(seeds)
-#findGradient(seeds[:, 0], seeds[:, 1])
-
-ax.scatter(xPoints, yPoints)
-for i in range(0, len(xPoints)):
-    ax.annotate(i+1, (xPoints[i], yPoints[i]), xycoords="data")
-
-
-lineCalc(seeds[:, 0], seeds[:, 1])
 
 plt.show()
